@@ -1,26 +1,9 @@
 from mlir.ir import *
 
 from .search_vars import *
-from .transform import Transform
+from .transform import Transform, TransformationList
 
 import mlir.all_passes_registration
-
-
-class Print(Transform):
-  """Print intermediate IR.
-
-  Dump the module and do not change it. The transform can be configured as
-  follows:
-  * `name`: Printer name.
-  """
-
-  def __init__(self, name=''):
-    self.name = name
-
-  def __call__(self, module: Module, fun_name: str):
-    print('[[[ IR printer: ' + self.name + ' ]]]')
-    module.dump()
-    return module
 
 
 class ExperimentalSplitAndFuseFillOp(Transform):
@@ -265,6 +248,10 @@ class LowerVectors(Transform):
         f'canonicalize,'
         f'cse')
     self.pipeline = (f'builtin.func({pipeline})')
+
+def StagedVectorLowering(**kwargs):
+  return TransformationList(
+      transforms=[LowerVectors(stage=i, **kwargs) for i in range(7)])
 
 
 class LowerToLLVM(Transform):

@@ -5,13 +5,13 @@
 from ..core.experts import *
 from ..core.harness import *
 from ..core.transforms import *
+from ..core.transform import Print
 
 from .definitions import *
 
 ################################################################################
 ### Expert for running the fusion tests.
 ################################################################################
-
 
 class FusionTestExpert(TransformationList):
 
@@ -29,7 +29,7 @@ class FusionTestExpert(TransformationList):
     for vectorize_op_name in vectorize_op_list:
       t += [Vectorize(fn_name, vectorize_op_name)]
     t += [Bufferize(), Print()
-          ] + [LowerVectors(stage=i) for i in range(7)] + [LowerToLLVM()]
+         ] + VectorLowering(fn_name, vectorize_op_name).transforms + [LowerToLLVM()]
     d = {'transforms': t}
     kwargs.update(d)
     TransformationList.__init__(self, **kwargs)
